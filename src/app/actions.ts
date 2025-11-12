@@ -1,5 +1,6 @@
 "use server";
 
+import mongoose from "mongoose";
 import { connectDB } from "@/libs/mongodb";
 import { Product } from "@/models/Products";
 import { EnrichedProducts } from "@/types/types";
@@ -7,7 +8,6 @@ import { EnrichedProducts } from "@/types/types";
 export const getAllProducts = async () => {
   try {
     await connectDB();
-
     const products: EnrichedProducts[] = await Product.find();
     return products;
   } catch (error) {
@@ -19,7 +19,6 @@ export const getAllProducts = async () => {
 export const getCategoryProducts = async (category: string) => {
   try {
     await connectDB();
-
     const products: EnrichedProducts[] = await Product.find({ category });
     return products;
   } catch (error) {
@@ -40,7 +39,6 @@ export const getRandomProducts = async (productId: string) => {
 
   try {
     await connectDB();
-
     const allProducts: EnrichedProducts[] = await Product.find();
     const shuffledProducts = shuffleArray(allProducts);
     const randomProducts = shuffledProducts
@@ -57,7 +55,13 @@ export const getProduct = async (_id: string) => {
   try {
     await connectDB();
 
-    const product = await Product.findOne({ _id });
+    if (!mongoose.Types.ObjectId.isValid(_id)) {
+      throw new Error("Invalid ObjectId");
+    }
+
+    const product = await Product.findOne({
+      _id: new mongoose.Types.ObjectId(_id),
+    });
     return product;
   } catch (error) {
     console.error("Error getting product:", error);
