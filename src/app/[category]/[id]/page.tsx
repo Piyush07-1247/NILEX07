@@ -8,6 +8,7 @@ import { Session } from "next-auth";
 import { Suspense } from "react";
 import ProductSkeleton from "@/components/skeletons/ProductSkeleton";
 import SingleProductSkeleton from "@/components/skeletons/SingleProductSkeleton";
+import mongoose from "mongoose";
 
 type Props = {
   params: {
@@ -20,7 +21,22 @@ const capitalizeFirstLetter = (string: string) => {
 };
 
 export async function generateMetadata({ params }: Props) {
-  const product: ProductDocument = await getProduct(params.id);
+  if (!mongoose.Types.ObjectId.isValid(params.id)) {
+    return {
+      title: "Invalid Product ID | Ecommerce Template",
+      description: "The product ID provided is invalid.",
+    };
+  }
+
+  const product: ProductDocument | null = await getProduct(params.id);
+
+  if (!product) {
+    return {
+      title: "Product Not Found | Ecommerce Template",
+      description: "The requested product does not exist.",
+    };
+  }
+
   const capitalizedName = capitalizeFirstLetter(product.name);
 
   return {
@@ -38,10 +54,7 @@ const ProductPage = async ({ params }: Props) => (
           <h2 className="mt-24 mb-5 text-xl font-bold sm:text-2xl">
             YOU MIGHT ALSO LIKE...
           </h2>
-          <ProductSkeleton
-            extraClassname={"colums-mobile"}
-            numberProducts={6}
-          />
+          <ProductSkeleton extraClassname={"colums-mobile"} numberProducts={6} />
         </div>
       }
     >
@@ -51,8 +64,17 @@ const ProductPage = async ({ params }: Props) => (
 );
 
 const AllProducts = async ({ id }: { id: string }) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return <div>Invalid product ID</div>;
+  }
+
   const session: Session | null = await getServerSession(authOptions);
-  const product: ProductDocument = await getProduct(id);
+
+  const product: ProductDocument | null = await getProduct(id);
+  if (!product) {
+    return <div>Product not found</div>;
+  }
+
   const randomProducts = await getRandomProducts(id);
   const productJSON = JSON.stringify(product);
 
