@@ -1,8 +1,10 @@
+"use client"; // Add this at the top only if your products or skeleton uses hooks/events
+
 import { Suspense } from "react";
 import { Products } from "../components/products/Products";
 import ProductSkeleton from "@/components/skeletons/ProductSkeleton";
 
-// Example static product data for development. You can add more items!
+// Example static product data for local development
 const exampleProducts = [
   {
     _id: "local1",
@@ -13,10 +15,10 @@ const exampleProducts = [
     sizes: ["S", "M", "L", "XL"],
     colors: ["black", "white"],
     images: [
-      "https://res.cloudinary.com/dr8ogepyt/image/upload/v1762800924/ujrb1ugaqeomuviackcn.jpg"
+      "https://res.cloudinary.com/dr8ogepyt/image/upload/v1762800924/ujrb1ugaqeomuviackcn.jpg",
     ],
     inStock: true,
-    createdAt: "2025-11-12T12:00:00Z"
+    createdAt: "2025-11-12T12:00:00Z",
   },
   {
     _id: "local2",
@@ -27,24 +29,26 @@ const exampleProducts = [
     sizes: ["M", "L", "XL"],
     colors: ["blue"],
     images: [
-      "https://res.cloudinary.com/dr8ogepyt/image/upload/v1762806914/products/hgdojwt7iyggicdzngdp.jpg"
+      "https://res.cloudinary.com/dr8ogepyt/image/upload/v1762806914/products/hgdojwt7iyggicdzngdp.jpg",
     ],
     inStock: true,
-    createdAt: "2025-11-12T12:00:00Z"
-  }
-  // Add more demo products if desired
+    createdAt: "2025-11-12T12:00:00Z",
+  },
+  // Add more demo products as needed
 ];
 
-const AllProducts = async () => {
-  // Use static data instead of real database fetch:
+function AllProducts() {
+  // Use local array for development; switch back to DB fetch when fixed
   const products = exampleProducts;
-
-  // For production, switch back to:
-  // const products = await getAllProducts();
-
   return <Products products={products} extraClassname="" />;
-};
+}
 
-const Home = async () => {
+export default function Home() {
   return (
-    <section class
+    <section className="pt-14">
+      <Suspense fallback={<ProductSkeleton extraClassname="" numberProducts={18} />}>
+        <AllProducts />
+      </Suspense>
+    </section>
+  );
+}
